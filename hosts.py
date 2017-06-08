@@ -12,7 +12,6 @@ def get(data, key, default):
 
     return data[key]
 
-
 def output_list_inventory(data):
     '''
     Output the --list data structure as JSON
@@ -27,21 +26,22 @@ def output_list_inventory(data):
 
     for group_name, data_group in get(data, "groups", dict()).iteritems():
         new_group = get(groups, group_name, dict())
+        if "hosts" in data_group:
+            new_group["hosts"] = data_group["hosts"]
+
         if "vars" in data_group:
             get(new_group, "vars", dict()).update(data_group["vars"])
-    
+
     for host_name, host in get(data, "hosts", dict()).iteritems():
         if "vars" in host:
             host_vars[host_name] = host["vars"]
-        
+
         for group_name in get(host, "groups", list()):
             group = get(groups, group_name, dict())
             group_hosts = get(group, "hosts", list())
             group_hosts.append(host_name)
 
-            
     print json.dumps(groups)
-
 
 def find_host(data, host_name):
     '''
