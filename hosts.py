@@ -54,14 +54,8 @@ def output_list_inventory(data):
         if "require" in data_group:
             for require_name in data_group["require"]:
                 require_group = get(groups, require_name, dict())
-                for host_name in hosts:
-                    keep = False
-                    for require_host_name in get(require_group, "hosts", list()):
-                        if require_host_name == host_name:
-                            keep = True
-
-                    if not keep:
-                        hosts.remove(host_name)
+                require_hosts = get(require_group, "hosts", list())
+                hosts[:] = [host_name for host_name in hosts if host_name in require_hosts]
 
     print json.dumps(groups)
 
