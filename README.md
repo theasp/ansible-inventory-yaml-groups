@@ -73,3 +73,7 @@ groups:
       - app1
       - app2
 ```
+
+# See Also
+- https://github.com/ansible/ansible/blob/devel/examples/hosts.yaml
+- https://github.com/jtyr/ansible-yaml_inventory
