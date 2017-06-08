@@ -23,52 +23,53 @@ Each host in the `hosts` section can have `groups` to define it's group membersh
 
 ```yaml
 hosts:
-  app1-web:
+  web-app1-prod.location1.com:
     groups:
       - app1
+      - location1
+      - prod
       - web
-      - prod
 
-  app1-db:
+  db-app1-prod.location1.com:
     groups:
       - app1
-      - db
+      - location1
       - prod
+      - db
 
-  app1-dev:
+  app1-dev.location1.com:
     vars:
       EXAMPLE: "true"
     groups:
       - app1
+      - location2
+      - dev
       - web
-      - db
-      - dev      
+      - dev
 ```
 
 ## Groups (optional)
 
-Entries in `groups` are optional, but they allow the creation groups by listing it's `hosts`, `children`, and/or `vars` as in the standard Ansible inventory file.  You can also use `include` to include all hosts from another group, and `require` to remove hosts that are not part of the other group, for instance all production web servers.  This is useful when combined with `group_vars` files
+Entries in `groups` are optional, but they allow the creation groups by listing it's `hosts`, `children`, and/or `vars` as in the standard Ansible inventory file.  You can also use `include` to include all hosts from another group, and `require` to remove hosts that are not part of the other group, for instance all production web servers.  This is useful when combined with `group_vars` files.
 
 ``` yaml
 groups:
+  app1-location1-prod:
+    include:
+      - app1
+    require:
+      - prod
 
-  app1-dev1:
-    include:
-      - app1
-    require:
-      - dev
-      
-  app1-web:
-    include:
-      - app1
-    require:
-      - web
-  
-  app2-web:
+  app2-prod:
     hosts:
       - app2-web1
-  
-  apps:
+
+  app2:
+    children:
+      - app2-prod
+      - app2-dev
+
+  all-apps:
     children:
       - app1
       - app2
