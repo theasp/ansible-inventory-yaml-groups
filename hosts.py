@@ -57,6 +57,12 @@ def output_list_inventory(data):
                 require_hosts = get(require_group, "hosts", list())
                 hosts[:] = [host_name for host_name in hosts if host_name in require_hosts]
 
+        if "exclude" in data_group:
+            for exclude_name in data_group["exclude"]:
+                exclude_group = get(groups, exclude_name, dict())
+                exclude_hosts = get(exclude_group, "hosts", list())
+                hosts[:] = [host_name for host_name in hosts if host_name not in exclude_hosts]
+
     print json.dumps(groups)
 
 def find_host(data, host_name):
