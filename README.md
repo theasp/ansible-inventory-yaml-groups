@@ -45,7 +45,7 @@ hosts:
       - location2
       - dev
       - web
-      - dev
+      - db
 ```
 
 ## Groups (optional)
@@ -54,7 +54,13 @@ Entries in `groups` are optional, but they allow the creation groups by listing 
 
 ``` yaml
 groups:
-  app1-location1-prod:
+  app1-prod:
+    include:
+      - app1
+    require:
+      - prod
+
+  app1-dev:
     include:
       - app1
     require:
