@@ -24,14 +24,6 @@ def output_list_inventory(data):
     host_vars = dict()
     meta["hostvars"] = host_vars
 
-    for group_name, data_group in get(data, "groups", dict()).iteritems():
-        new_group = get(groups, group_name, dict())
-        if "hosts" in data_group:
-            new_group["hosts"] = data_group["hosts"]
-
-        if "vars" in data_group:
-            get(new_group, "vars", dict()).update(data_group["vars"])
-
     for host_name, host in get(data, "hosts", dict()).iteritems():
         if "vars" in host:
             host_vars[host_name] = host["vars"]
@@ -40,6 +32,36 @@ def output_list_inventory(data):
             group = get(groups, group_name, dict())
             group_hosts = get(group, "hosts", list())
             group_hosts.append(host_name)
+
+    for group_name, data_group in get(data, "groups", dict()).iteritems():
+        new_group = get(groups, group_name, dict())
+        hosts = get(new_group, "hosts", list())
+
+        if "hosts" in data_group:
+            hosts.append(data_group["hosts"])
+
+        if "vars" in data_group:
+            get(new_group, "vars", dict()).update(data_group["vars"])
+
+        if "children" in data_group:
+            get(new_group, "children", list()).append(data_group["children"])
+
+        if "include" in data_group:
+            for include_name in data_group["include"]:
+                include_group = get(groups, include_name, dict())
+                hosts.extend(get(include_group, "hosts", list()))
+
+        if "require" in data_group:
+            for require_name in data_group["require"]:
+                require_group = get(groups, require_name, dict())
+                for host_name in hosts:
+                    keep = False
+                    for require_host_name in get(require_group, "hosts", list()):
+                        if require_host_name == host_name:
+                            keep = True
+
+                    if not keep:
+                        hosts.remove(host_name)
 
     print json.dumps(groups)
 
