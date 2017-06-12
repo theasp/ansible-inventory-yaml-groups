@@ -6,12 +6,6 @@ import yaml
 import sys
 import os.path
 
-def get(data, key, default):
-    if key not in data:
-        data[key] = default
-
-    return data[key]
-
 def output_list_inventory(data):
     '''
     Output the --list data structure as JSON
@@ -24,41 +18,62 @@ def output_list_inventory(data):
     host_vars = dict()
     meta["hostvars"] = host_vars
 
-    for host_name, host in get(data, "hosts", dict()).iteritems():
-        if "vars" in host:
-            host_vars[host_name] = host["vars"]
+    for host_name, data_host in data.pop("hosts", dict()).iteritems():
+        if "vars" in data_host:
+            this_host_vars = host_vars.pop(host_name, dict())
+            this_host_vars.update(data_host["vars"])
+            host_vars[host_name] = this_host_vars
 
-        for group_name in get(host, "groups", list()):
-            group = get(groups, group_name, dict())
-            group_hosts = get(group, "hosts", list())
+        for group_name in data_host.pop("groups", list()):
+            group = groups.pop(group_name, dict())
+            group_hosts = group.pop("hosts", list())
             group_hosts.append(host_name)
+            if len(group_hosts) > 0:
+                group["hosts"] = group_hosts
 
-    for group_name, data_group in get(data, "groups", dict()).iteritems():
-        new_group = get(groups, group_name, dict())
-        hosts = get(new_group, "hosts", list())
+            if len(group) > 0:
+                groups[group_name] = group
+
+    for group_name, data_group in data.pop("groups", dict()).iteritems():
+        group = groups.pop(group_name, dict())
+        group_hosts = group.pop("hosts", list())
+        group_vars = group.pop("vars", dict())
 
         if "hosts" in data_group:
-            hosts.append(data_group["hosts"])
+            group_hosts.extend(data_group["hosts"])
 
         if "vars" in data_group:
-            get(new_group, "vars", dict()).update(data_group["vars"])
+            group_vars.update(data_group["vars"])
 
         if "include" in data_group:
             for include_name in data_group["include"]:
-                include_group = get(groups, include_name, dict())
-                hosts.extend(get(include_group, "hosts", list()))
+                include_group = groups.pop(include_name, dict())
+                group_hosts.extend(include_group.pop("hosts", list()))
 
         if "require" in data_group:
             for require_name in data_group["require"]:
-                require_group = get(groups, require_name, dict())
-                require_hosts = get(require_group, "hosts", list())
-                hosts[:] = [host_name for host_name in hosts if host_name in require_hosts]
+                require_group = groups.pop(require_name, dict())
+                require_hosts = require_group.pop("hosts", list())
+                group_hosts[:] = [host_name for host_name in group_hosts if host_name in require_hosts]
 
         if "exclude" in data_group:
             for exclude_name in data_group["exclude"]:
-                exclude_group = get(groups, exclude_name, dict())
-                exclude_hosts = get(exclude_group, "hosts", list())
-                hosts[:] = [host_name for host_name in hosts if host_name not in exclude_hosts]
+                exclude_group = groups.pop(exclude_name, dict())
+                exclude_hosts = exclude_groups.pop("hosts", list())
+                group_hosts[:] = [host_name for host_name in group_hosts if host_name not in exclude_hosts]
+
+        if len(group_hosts) > 0:
+            group["hosts"] = group_hosts
+
+        if len(group_vars) > 0:
+            group["vars"] = group_vars
+
+        if len(group) > 0:
+            groups[group_name] = group
+
+    for group_name, group in groups.iteritems():
+        if 'hosts' in group:
+            group["hosts"] = sorted(set(group["hosts"]))
 
     print json.dumps(groups)
 
