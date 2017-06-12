@@ -43,9 +43,6 @@ def output_list_inventory(data):
         if "vars" in data_group:
             get(new_group, "vars", dict()).update(data_group["vars"])
 
-        if "children" in data_group:
-            get(new_group, "children", list()).append(data_group["children"])
-
         if "include" in data_group:
             for include_name in data_group["include"]:
                 include_group = get(groups, include_name, dict())

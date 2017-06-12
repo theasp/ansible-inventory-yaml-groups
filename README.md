@@ -18,7 +18,7 @@ You can control the name of the `hosts.yml` file by setting `ANSIBLE_HOSTS_YML`.
 The YAML file is divided into two sections, `groups` and `hosts`.
 
 ## Groups (optional)
-Entries in `groups` are optional, but they allow the creation groups by listing it's `hosts`, `children`, and/or `vars` as in the standard Ansible inventory file.  Hosts listed in `hosts` will be created even if there is no corresponding entry in the `hosts` section.
+Entries in `groups` are optional, but they allow the creation groups by listing it's `hosts`, and/or `vars` as in the standard Ansible inventory file.  Hosts listed in `hosts` will be created even if there is no corresponding entry in the `hosts` section.
 
 You can also provide a list of groups to `include` all hosts from, a list of groups to `require` that each host belong to, and a list of groups to `exclude` that each host must not belong to.
 
@@ -46,12 +46,12 @@ groups:
       - app2-web1
 
   app2:
-    children:
+    include:
       - app2-prod
       - app2-dev
 
   all-apps:
-    children:
+    include:
       - app1
       - app2
 
