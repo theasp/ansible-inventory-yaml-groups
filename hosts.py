@@ -4,7 +4,6 @@ import argparse
 import json
 import yaml
 import sys
-import os.path
 
 def get(d, key, default):
     if key in d:
@@ -43,7 +42,7 @@ def process_hosts(groups, data):
     for host_name, data_host in get(data, "hosts", dict()).iteritems():
         if "vars" in data_host:
             host_vars = get_in(groups, [host_name, "vars"], dict())
-            host_vars.update(data_host["vars"])
+            host_vars.update(get(data_host, "vars", dict()))
             assoc_in(groups, [host_name, "vars"], host_vars)
             assoc_in(groups, ["_meta", "hostvars", host_name], host_vars)
 
@@ -60,24 +59,20 @@ def process_groups(groups, data):
         group_hosts = get_in(groups, [group_name, "hosts"], list())
         group_vars = get_in(groups, [group_name, "vars"], dict())
 
-        if "hosts" in data_group:
-            group_hosts += data_group["hosts"]
+        group_hosts += get(data_group, "hosts", list())
 
-        if "vars" in data_group:
-            group_vars.update(get(data_group, "vars", dict()))
+        group_vars.update(get(data_group, "vars", dict()))
 
-        if ("include" in data_group):
-            for include_name in get(data_group, "include", list()):
-                group_hosts += get_in(groups, [include_name, "hosts"], list())
+        for include_name in get(data_group, "include", list()):
+            group_hosts += get_in(groups, [include_name, "hosts"], list())
 
-        if "require" in data_group:
-            for require_name in get(data_group, "require", list()):
-                group_hosts += get_in(groups, [require_name, "hosts"], list())
+        for require_name in get(data_group, "require", list()):
+            require_hosts = get_in(groups, [require_name, "hosts"], list())
+            group_hosts[:] = [host_name for host_name in group_hosts if host_name in require_hosts]
 
-        if "exclude" in data_group:
-            for exclude_name in get(data_group, "require", list()):
-                exclude_hosts = get_in(groups, [exclude_name, "hosts"], list())
-                group_hosts[:] = [host_name for host_name in group_hosts if host_name not in exclude_hosts]
+        for exclude_name in get(data_group, "exclude", list()):
+            exclude_hosts = get_in(groups, [exclude_name, "hosts"], list())
+            group_hosts[:] = [host_name for host_name in group_hosts if host_name not in exclude_hosts]
 
         if len(group_hosts) > 0:
             assoc_in(groups, [group_name, "hosts"], group_hosts)
