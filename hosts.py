@@ -12,80 +12,107 @@ def get(d, key, default):
     else:
         return default
 
-def output_list_inventory(data):
-    '''
-    Output the --list data structure as JSON
-    '''
+def get_in(d, keys, default):
+    for key in keys:
+        if key in d:
+            d = d[key]
+        else:
+            return default
+    return d
 
-    groups = dict()
-    meta = dict()
-    groups["_meta"] = meta
+# Pointless..
+#def assoc(d, key, value):
+#    d[key] = value
 
-    host_vars = dict()
-    meta["hostvars"] = host_vars
+def assoc_in(d, keys, value):
+    for key in keys[:-1]:
+        if key not in d:
+            d[key] = dict()
+        d = d[key]
 
+    d[keys[-1]] = value
+
+def update_in(d, keys, update_fn):
+    value = get_in(d, keys, dict())
+    assoc_in(d, keys, update_fn(value))
+
+def update(d, key, update_fn):
+    d[key] = update_fn(get(d, key, dict()))
+
+def process_hosts(groups, data):
     for host_name, data_host in get(data, "hosts", dict()).iteritems():
         if "vars" in data_host:
-            this_host_vars = get(host_vars, host_name, dict())
-            this_host_vars.update(data_host["vars"])
-            host_vars[host_name] = this_host_vars
+            host_vars = get_in(groups, [host_name, "vars"], dict())
+            host_vars.update(data_host["vars"])
+            assoc_in(groups, [host_name, "vars"], host_vars)
+            assoc_in(groups, ["_meta", "hostvars", host_name], host_vars)
 
         for group_name in get(data_host, "groups", list()):
-            group = get(groups, group_name, dict())
-            group_hosts = get(group, "hosts", list())
+            group_hosts = get_in(groups, [group_name, "hosts"], list())
             group_hosts.append(host_name)
-            group["hosts"] = group_hosts
-            groups[group_name] = group
+            assoc_in(groups, [group_name, "hosts"], group_hosts)
 
+    return groups
+
+def process_groups(groups, data):
     #print(json.dumps(groups))
     for group_name, data_group in get(data, "groups", dict()).iteritems():
-        group = get(groups, group_name, dict())
-        group_hosts = get(group, "hosts", list())
-        group_vars = get(group, "vars", dict())
+        group_hosts = get_in(groups, [group_name, "hosts"], list())
+        group_vars = get_in(groups, [group_name, "vars"], dict())
 
         if "hosts" in data_group:
             group_hosts += data_group["hosts"]
 
         if "vars" in data_group:
-            group_vars.update(data_group["vars"])
+            group_vars.update(get(data_group, "vars", dict()))
 
-        if ("include" in data_group and isinstance(data_group["include"], list)):
-            for include_name in data_group["include"]:
-                include_group = get(groups, include_name, dict())
-                include_hosts = get(include_group, "hosts", list())
-                group_hosts += include_hosts
+        if ("include" in data_group):
+            for include_name in get(data_group, "include", list()):
+                group_hosts += get_in(groups, [include_name, "hosts"], list())
 
         if "require" in data_group:
-            for require_name in data_group["require"]:
-                require_group = get(groups, require_name, dict())
-                require_hosts = get(require_group, "hosts", list())
-                group_hosts.extend(require_hosts)
+            for require_name in get(data_group, "require", list()):
+                group_hosts += get_in(groups, [require_name, "hosts"], list())
 
         if "exclude" in data_group:
-            for exclude_name in data_group["exclude"]:
-                exclude_group = get(groups, exclude_name, dict())
-                exclude_hosts = get(exclude_groups, "hosts", list())
+            for exclude_name in get(data_group, "require", list()):
+                exclude_hosts = get_in(groups, [exclude_name, "hosts"], list())
                 group_hosts[:] = [host_name for host_name in group_hosts if host_name not in exclude_hosts]
 
-        group["hosts"] = group_hosts
+        if len(group_hosts) > 0:
+            assoc_in(groups, [group_name, "hosts"], group_hosts)
+
         if len(group_vars) > 0:
-            group["vars"] = group_vars
-        groups[group_name] = group
+            assoc_in(groups, [group_name, "vars"], group_vars)
+
+    return groups
+
+def make_groups(data):
+    groups = dict()
+    meta = dict()
+    groups["_meta"] = meta
+
+    process_hosts(groups, data)
+    process_groups(groups, data)
 
     for group_name, group in groups.iteritems():
-        if 'hosts' in group:
-            group["hosts"] = sorted(set(group["hosts"]))
+        update(group, "hosts", lambda hosts: sorted(set(hosts)))
 
-    print json.dumps(groups)
+    meta.pop("hosts")
+    return groups
+
+def output_list_inventory(data):
+    '''
+    Output the --list data structure as JSON
+    '''
+    print json.dumps(make_groups(data))
 
 def find_host(data, host_name):
     '''
     Find the given variables for the given host and output them as JSON
     '''
 
-    host = get(hosts, host_name, dict())
-    host_vars = get(host, "vars", dict())
-    print json.dumps(host_vars)
+    print json.dumps(get_in(data, ["hosts", host_name, "vars"], dict()))
 
 def main():
     '''
