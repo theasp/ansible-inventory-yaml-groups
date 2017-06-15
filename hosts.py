@@ -41,9 +41,8 @@ def update(d, key, update_fn):
 def process_hosts(groups, data):
     for host_name, data_host in get(data, "hosts", dict()).iteritems():
         if "vars" in data_host:
-            host_vars = get_in(groups, [host_name, "vars"], dict())
+            host_vars = get_in(groups, ["_meta", "hostvars", host_name], dict())
             host_vars.update(get(data_host, "vars", dict()))
-            assoc_in(groups, [host_name, "vars"], host_vars)
             assoc_in(groups, ["_meta", "hostvars", host_name], host_vars)
 
         for group_name in get(data_host, "groups", list()):
