@@ -126,8 +126,15 @@ def main():
     cli_args = parser.parse_args()
     list_inventory = cli_args.list_inventory
     ansible_host = cli_args.ansible_host
-    inventory_file = cli_args.file or os.environ["ANSIBLE_HOSTS_YML"] or "hosts.ymlx"
+    inventory_file = cli_args.file
 
+    if not inventory_file:
+        if "ANSIBLE_HOSTS_YML" in os.environ:
+            inventory_file = os.environ["ANSIBLE_HOSTS_YML"]
+
+    if not inventory_file:
+        inventory_file="hosts.yml"
+            
     try:
         with open(inventory_file, 'r') as stream:
             data=yaml.load(stream)
