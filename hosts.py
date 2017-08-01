@@ -137,9 +137,6 @@ def main():
             if ansible_host:
                 find_host(data, ansible_host)
 
-    # except yaml.YAMLError as exc:
-    #     print(exc)
-    #     print("Problem reading " + inventory_file + ": " + exc)
     except Exception as exc:
         print(exc)
         sys.exit(1)
