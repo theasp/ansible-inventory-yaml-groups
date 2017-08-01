@@ -129,11 +129,7 @@ def main():
     inventory_file = cli_args.file
 
     if not inventory_file:
-        if "ANSIBLE_HOSTS_YML" in os.environ:
-            inventory_file = os.environ["ANSIBLE_HOSTS_YML"]
-
-    if not inventory_file:
-        inventory_file="hosts.yml"
+        inventory_file = os.getenv("ANSIBLE_HOSTS_YML", "hosts.yml")
 
     try:
         with open(inventory_file, 'r') as stream:
