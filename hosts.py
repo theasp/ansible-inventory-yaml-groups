@@ -3,6 +3,7 @@
 import argparse
 import json
 import yaml
+import os
 import sys
 
 def get(d, key, default):
@@ -119,19 +120,31 @@ def main():
                         action="store_true", dest="list_inventory")
     parser.add_argument("--host", help="Ansible inventory of a particular host", action="store",
                         dest="ansible_host", type=str)
+    parser.add_argument("--file", help="Inventory file", action="store",
+                        dest="file", type=str)
 
     cli_args = parser.parse_args()
     list_inventory = cli_args.list_inventory
     ansible_host = cli_args.ansible_host
+    inventory_file = cli_args.file or os.environ["ANSIBLE_HOSTS_YML"] or "hosts.ymlx"
 
-    data = yaml.load(sys.stdin)
+    try:
+        with open(inventory_file, 'r') as stream:
+            data=yaml.load(stream)
+            if list_inventory:
+                output_list_inventory(data)
 
-    if list_inventory:
-        output_list_inventory(data)
+            if ansible_host:
+                find_host(data, ansible_host)
 
-    if ansible_host:
-        find_host(data, ansible_host)
+    # except yaml.YAMLError as exc:
+    #     print(exc)
+    #     print("Problem reading " + inventory_file + ": " + exc)
+    except Exception as exc:
+        print(exc)
+        sys.exit(1)
 
+    sys.exit(0)
 
 if __name__ == "__main__":
     main()

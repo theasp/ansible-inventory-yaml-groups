@@ -4,11 +4,11 @@ Alternative YAML formatted inventory for Ansible. This allows you to to assign g
 *NOTE:* Ansible supports it's own YML formatted inventory, see: https://github.com/ansible/ansible/blob/devel/examples/hosts.yaml
 
 # Usage
-Copy `hosts.py` and `hosts.sh` into the directory you are using ansible from.  In `ansible.cfg`, set `inventory` to `hosts.sh`.
+Copy `hosts.py` into the directory you are using ansible from.  In `ansible.cfg`, set `inventory` to `hosts.py`.
 
 ```
 [defaults]
-inventory = hosts.sh
+inventory = hosts.py
 ```
 
 You can control the name of the `hosts.yml` file by setting `ANSIBLE_HOSTS_YML`.
@@ -85,12 +85,12 @@ hosts:
 
 To see the generated inventory, run:
 ``` bash
-./hosts.sh --list
+./hosts.py --list
 ```
 
 You can use `jq` to make it a bit more readable:
 ``` bash
-./hosts.sh --list | jq .
+./hosts.py --list | jq .
 ```
 
 
