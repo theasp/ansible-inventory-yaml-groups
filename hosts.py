@@ -134,7 +134,7 @@ def main():
 
     if not inventory_file:
         inventory_file="hosts.yml"
-            
+
     try:
         with open(inventory_file, 'r') as stream:
             data=yaml.load(stream)
