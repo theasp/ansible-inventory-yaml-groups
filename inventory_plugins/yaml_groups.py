@@ -1,52 +1,75 @@
-# Copyright (c) 2017 Ansible Project
-# GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
-
 from __future__ import (absolute_import, division, print_function)
 __metaclass__ = type
 
 DOCUMENTATION = '''
-    inventory: yaml
-    version_added: "2.4"
+    inventory: yaml_groups
     short_description: Uses a specifically YAML file as inventory source.
     description:
-        - "YAML based inventory, starts with the 'all' group and has hosts/vars/children entries."
-        - Host entries can have sub-entries defined, which will be treated as variables.
-        - Vars entries are normal group vars.
-        - "Children are 'child groups', which can also have their own vars/hosts/children and so on."
-        - File MUST have a valid extension, defined in configuration
+        - Alternative YAML formatted inventory for Ansible.
+        - Allows you to to assign groups to hosts as well as hosts to groups
+        - Easily make new groups that are supersets and subsets of other groups.
     notes:
-        - It takes the place of the previously hardcoded YAML inventory.
         - To function it requires being whitelisted in configuration.
     options:
         yaml_extensions:
             description: list of 'valid' extensions for files containing YAML
             type: list
             default: ['.yaml', '.yml', '.json']
+    url:
 '''
 EXAMPLES = '''
-all: # keys must be unique, i.e. only one 'hosts' per group
+---
+groups:
+  app1-prod:
+    include:
+      - app1
+    require:
+      - prod
+
+  app1-dev:
+    include:
+      - app1
+    require:
+      - prod
+
+  app2-prod:
     hosts:
-        test1:
-        test2:
-            var1: value1
+      - app2-web1
+
+  app2:
+    include:
+      - app2-prod
+      - app2-dev
+
+  all-apps:
+    include:
+      - app1
+      - app2
+
+hosts:
+  web-app1-prod.location1.com:
+    groups:
+      - app1
+      - location1
+      - prod
+      - web
+
+  db-app1-prod.location1.com:
+    groups:
+      - app1
+      - location1
+      - prod
+      - db
+
+  app1-dev.location1.com:
     vars:
-        group_var1: value2
-    children:   # key order does not matter, indentation does
-        other_group:
-            children:
-                group_x:
-                    hosts:
-                        test5
-            vars:
-                g2_var2: value3
-            hosts:
-                test4:
-                    ansible_host: 127.0.0.1
-        last_group:
-            hosts:
-                test1 # same host as above, additional group membership
-            vars:
-                last_var: MYVALUE
+      EXAMPLE: "true"
+    groups:
+      - app1
+      - location2
+      - dev
+      - web
+      - db
 '''
 
 import os
@@ -85,12 +108,15 @@ def must_be_dict(obj, name=None):
 
 def must_not_be_plugin(obj):
     if 'plugin' in obj:
-        raise AnsibleParserError('Plugin configuration YAML file, not YAML inventory')
+        raise AnsibleParserError('Plugin configuration YAML file, not YAML groups inventory')
 
+    if 'all' in obj:
+        raise AnsibleParserError('Standard configuration YAML file, not YAML groups inventory')
+    
     return obj
 
 class InventoryModule(BaseFileInventoryPlugin):
-    NAME = 'andrew'
+    NAME = 'yaml-groups'
 
     def __init__(self):
         super(InventoryModule, self).__init__()
@@ -133,7 +159,7 @@ class InventoryModule(BaseFileInventoryPlugin):
         '''
         Each host key can be a pattern, try to process it and add variables as needed
         '''
-        must_be_dict(host)        
+        must_be_dict(host)
         (host_names, port) = self._expand_hostpattern(host_pattern)
 
         for host_name in host_names:
