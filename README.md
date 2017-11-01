@@ -1,14 +1,14 @@
-# ansible-inventory-yml
+# ansible-inventory-yaml-groups
 Alternative YAML formatted inventory for Ansible. This allows you to to assign groups to hosts as well as hosts to groups, and easily make new groups that are supersets and subsets of other groups.
 
-*NOTE:* Ansible supports it's own YML formatted inventory, see: https://github.com/ansible/ansible/blob/devel/examples/hosts.yaml
+*NOTE:* Ansible supports it's own YAML formatted inventory, see: https://github.com/ansible/ansible/blob/devel/examples/hosts.yaml
 
 # Usage
-Copy `hosts.py` into the directory you are using ansible from.  In `ansible.cfg`, set `inventory` to `hosts.py`.
+Copy `yaml_groups.py` into the directory you are using ansible from.  In `ansible.cfg`, set `inventory` to `yaml_groups.py`.
 
 ```
 [defaults]
-inventory = hosts.py
+inventory = yaml_groups.py
 ```
 
 You can control the name of the `hosts.yml` file by setting `ANSIBLE_HOSTS_YML`.
@@ -85,12 +85,12 @@ hosts:
 
 To see the generated inventory, run:
 ``` bash
-./hosts.py --list
+./yaml_groups.py --list
 ```
 
 You can use `jq` to make it a bit more readable:
 ``` bash
-./hosts.py --list | jq .
+./yaml_groups.py --list | jq .
 ```
 
 
