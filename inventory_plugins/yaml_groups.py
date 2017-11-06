@@ -161,9 +161,11 @@ class InventoryModule(BaseFileInventoryPlugin):
         '''
         must_be_dict(host)
         (host_names, port) = self._expand_hostpattern(host_pattern)
+        all_group = self.inventory.groups['all']
 
         for host_name in host_names:
             self.inventory.add_host(host_name, port=port)
+            all_group.add_host(self.inventory.get_host(host_name))
 
         if 'groups' in host:
             self._parse_host_groups(host_names, host['groups'])
@@ -192,6 +194,8 @@ class InventoryModule(BaseFileInventoryPlugin):
         self.inventory.add_group(group_name)
         group = self.inventory.groups[group_name]
 
+        all_group = self.inventory.groups['all']
+
         if 'vars' in group_data:
             group_vars = must_be_dict(group_data['vars'], name='vars')
             for var_name in group_vars:
@@ -202,6 +206,7 @@ class InventoryModule(BaseFileInventoryPlugin):
             for host_name in host_names:
                 self.inventory.add_host(host_name)
                 group.add_host(host_name)
+                all_group.add_host(self.inventory.get_host(host_name))
 
         if 'include' in group_data:
             include_names = must_be_sequence(group_data['include'], name='include')
