@@ -220,29 +220,29 @@ class InventoryModule(BaseFileInventoryPlugin):
 
     def _parse_group_include(self, group, include_name):
         if include_name not in self.inventory.groups:
-            raise AnsibleParserError('Group "%s" includes non-existant group "%s"' % (group_name, include_name))
+            raise AnsibleParserError('Group "%s" includes non-existant group "%s"' % (group.name, include_name))
 
         include_group = self.inventory.groups[include_name]
-        for host_name in include_group.get_hosts():
-            group.add_host(host_name)
+        for host in include_group.get_hosts():
+            group.add_host(host)
 
     def _parse_group_require(self, group, require_name):
         if require_name not in self.inventory.groups:
-            raise AnsibleParserError('Group "%s" requires non-existant group "%s"' % (group_name, require_name))
+            raise AnsibleParserError('Group "%s" requires non-existant group "%s"' % (group.name, require_name))
 
         require_group = self.inventory.groups[require_name]
-        for host_name in group.get_hosts():
-            if host_name not in require_group.get_hosts():
-                group.remove_host(host_name)
+        for host in group.get_hosts():
+            if host not in require_group.get_hosts():
+                group.remove_host(host)
 
     def _parse_group_exclude(self, group, exclude_name):
         if exclude_name not in self.inventory.groups:
-            raise AnsibleParserError('Group "%s" excludes non-existant group "%s"' % (group_name, exclude_name))
+            raise AnsibleParserError('Group "%s" excludes non-existant group "%s"' % (group.name, exclude_name))
 
         exclude_group = self.inventory.groups[exclude_name]
-        for host_name in exclude_group.get_hosts():
-            if host_name in group.get_hosts():
-                group.remove_host(host_name)
+        for host in exclude_group.get_hosts():
+            if host in group.get_hosts():
+                group.remove_host(host)
 
     def _expand_hostpattern(self, hostpattern):
         '''
