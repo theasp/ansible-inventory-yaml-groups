@@ -112,7 +112,7 @@ def must_not_be_plugin(obj):
 
     if 'all' in obj:
         raise AnsibleParserError('Standard configuration YAML file, not YAML groups inventory')
-    
+
     return obj
 
 class InventoryModule(BaseFileInventoryPlugin):
