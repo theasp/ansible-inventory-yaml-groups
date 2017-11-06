@@ -225,7 +225,7 @@ class InventoryModule(BaseFileInventoryPlugin):
 
     def _parse_group_include(self, group, include_name):
         if include_name not in self.inventory.groups:
-            raise AnsibleParserError('Group "%s" includes non-existant group "%s"' % (group.name, include_name))
+            return
 
         include_group = self.inventory.groups[include_name]
         for host in include_group.get_hosts():
@@ -242,7 +242,7 @@ class InventoryModule(BaseFileInventoryPlugin):
 
     def _parse_group_exclude(self, group, exclude_name):
         if exclude_name not in self.inventory.groups:
-            raise AnsibleParserError('Group "%s" excludes non-existant group "%s"' % (group.name, exclude_name))
+            return
 
         exclude_group = self.inventory.groups[exclude_name]
         for host in exclude_group.get_hosts():
