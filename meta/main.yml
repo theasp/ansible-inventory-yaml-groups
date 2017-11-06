@@ -3,7 +3,10 @@ galaxy_info:
   description: Alternative YAML formatted inventory
   license: MIT
   min_ansible_version: 2.4
+  platforms:
+  - name: all
+    versions:
+    - all
   galaxy_tags:
     - inventory
     - yaml
-
