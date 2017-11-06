@@ -1,0 +1,9 @@
+---
+hosts:
+  app1.example.com:
+    groups:
+      - app
+
+  app2.example.com:
+    groups:
+      - app
