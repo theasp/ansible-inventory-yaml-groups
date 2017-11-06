@@ -5,7 +5,7 @@ Alternative YAML formatted inventory for Ansible. This allows you to to assign g
 
 # Installation
 
-If you are using Ansible 2.4 or later you can use the inventory version, otherwise you must use the dynamic inventory version.
+If you are using Ansible 2.4 or later you can use the inventory plugin version, otherwise you must use the dynamic inventory version.
 
 ## Inventory Plugin (2.4+)
 
