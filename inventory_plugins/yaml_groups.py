@@ -173,9 +173,15 @@ class InventoryModule(BaseFileInventoryPlugin):
         if 'vars' in host:
             self._parse_host_vars(host_names, host['vars'])
 
+    def _populate_host_vars(self, hosts, variables, group=None, port=None):
+        for host in hosts:
+            self.inventory.add_host(host, group=group, port=port)
+            for k in variables:
+                self.inventory.set_variable(host, k, variables[k])
+
     def _parse_host_vars(self, host_names, host_vars):
         must_be_dict(host_vars, name='vars')
-        self.populate_host_vars(host_names, host_vars)
+        self._populate_host_vars(host_names, host_vars)
 
     def _parse_host_groups(self, host_names, host_groups):
         must_be_sequence(host_groups, name='groups')
