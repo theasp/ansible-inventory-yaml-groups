@@ -83,7 +83,7 @@ from ansible.parsing.utils.addresses import parse_address
 from ansible.plugins.inventory import BaseFileInventoryPlugin, detect_range, expand_hostname_range
 
 def is_sequence(obj):
-    return isinstance(obj, Sequence) and not isinstance(obj, basestring)
+    return isinstance(obj, Sequence) and not isinstance(obj, str)
 
 def is_dict(obj):
     return isinstance(obj, MutableMapping)
