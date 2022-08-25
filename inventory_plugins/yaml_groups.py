@@ -73,7 +73,7 @@ hosts:
 '''
 
 import os
-from collections import MutableMapping, Sequence
+from collections.abc import MutableMapping, Sequence
 
 from ansible import constants as C
 from ansible.errors import AnsibleParserError
