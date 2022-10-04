@@ -221,7 +221,7 @@ class InventoryModule(BaseFileInventoryPlugin):
         for group_set in toposort2(graph):
             for group_name in group_set:
                 if group_name in groups:
-                    self._fill_group(group_name, orig_groups[group_name])
+                    self._fill_group(group_name, groups[group_name])
 
     def _parse_group(self, group_name, group_data, graph):
         must_be_dict(group_data, name=('groups/%s %s' % (group_name, group_data)))
