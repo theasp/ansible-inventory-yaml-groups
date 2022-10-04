@@ -246,36 +246,36 @@ class InventoryModule(BaseFileInventoryPlugin):
 
         if 'include' in group_data:
             include_names = must_be_sequence(group_data['include'], name='include')
-            for include_name in include_names:
-                deps.add(include_name)
+            for group_name in include_names:
+                deps.add(group_name)
 
         if 'require' in group_data:
             require_names = must_be_sequence(group_data['require'], name='require')
-            for require_name in require_names:
-                deps.add(include_name)
+            for group_name in require_names:
+                deps.add(group_name)
 
         if 'exclude' in group_data:
             exclude_names = must_be_sequence(group_data['exclude'], name='exclude')
-            for exclude_name in exclude_names:
-                deps.add(include_name)
+            for group_name in exclude_names:
+                deps.add(group_name)
 
     def _fill_group(self, group_name, group_data):
         group = self.inventory.groups[group_name]
 
         if 'include' in group_data:
             include_names = must_be_sequence(group_data['include'], name='include')
-            for include_name in include_names:
-                self._parse_group_include(group, include_name)
+            for group_name in include_names:
+                self._parse_group_include(group, group_name)
 
         if 'require' in group_data:
             require_names = must_be_sequence(group_data['require'], name='require')
-            for require_name in require_names:
-                self._parse_group_require(group, require_name)
+            for group_name in require_names:
+                self._parse_group_require(group, group_name)
 
         if 'exclude' in group_data:
             exclude_names = must_be_sequence(group_data['exclude'], name='exclude')
-            for exclude_name in exclude_names:
-                self._parse_group_exclude(group, exclude_name)
+            for group_name in exclude_names:
+                self._parse_group_exclude(group, group_name)
 
     def _parse_group_include(self, group, include_name):
         if include_name not in self.inventory.groups:
