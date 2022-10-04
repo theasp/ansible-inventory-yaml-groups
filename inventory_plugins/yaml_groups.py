@@ -130,7 +130,7 @@ def toposort2(data):
         ordered = set(item for item,dep in data.items() if not dep)
         if not ordered:
             break
-        yield ' '.join(sorted(ordered))
+        yield (sorted(ordered))
         data = {item: (dep - ordered) for item,dep in data.items()
                 if item not in ordered}
     if data:
@@ -218,9 +218,10 @@ class InventoryModule(BaseFileInventoryPlugin):
         for group_name in sorted(groups):
             self._parse_group(group_name, groups[group_name], graph)
 
-        toposort2(graph)
-        for group_name in graph:
-            self._fill_group(group_name, groups[group_name])
+        for group_set in toposort2(graph):
+            for group_name in group_set:
+                if group_name in groups:
+                    self._fill_group(group_name, orig_groups[group_name])
 
     def _parse_group(self, group_name, group_data, graph):
         must_be_dict(group_data, name=('groups/%s %s' % (group_name, group_data)))
